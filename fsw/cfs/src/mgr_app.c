@@ -79,11 +79,6 @@ void MGR_AppMain(void)
     }
 
     /*
-    ** Disable component, which cleans up the interface, upon exit
-    */
-    MGR_Disable();
-
-    /*
     ** Performance log exit stamp
     */
     CFE_ES_PerfLogExit(MGR_PERF_ID);
@@ -149,10 +144,6 @@ int32 MGR_AppInit(void)
     }
 
     /*
-    ** TODO: Subscribe to any other messages here
-    */
-
-    /*
     ** Initialize the published HK message - this HK message will contain the
     ** telemetry that has been defined in the MGR_HkTelemetryPkt for this app.
     */
@@ -160,29 +151,16 @@ int32 MGR_AppInit(void)
                  MGR_HK_TLM_LNGTH);
 
     /*
-    ** Initialize the device packet message
-    ** This packet is specific to your application
-    */
-    CFE_MSG_Init(CFE_MSG_PTR(MGR_AppData.DevicePkt.TlmHeader), CFE_SB_ValueToMsgId(MGR_DEVICE_TLM_MID),
-                 MGR_DEVICE_TLM_LNGTH);
-
-    /*
-    ** TODO: Initialize any other messages that this app will publish
-    */
-
-    /*
     ** Always reset all counters during application initialization
     */
     MGR_ResetCounters();
 
-    /*
-    ** Initialize application data
-    ** Note that counters are excluded as they were reset in the previous code block
+    /* 
+    ** Restore Housekeeping Telemetry from the file system.
+    ** If the restore fails for any reason, the data will be cleared.
+    ** This function will also set some values such as SpacecraftMode if necessary.
     */
-    MGR_AppData.HkTelemetryPkt.DeviceEnabled          = MGR_DEVICE_DISABLED;
-    MGR_AppData.HkTelemetryPkt.DeviceHK.DeviceCounter = 0;
-    MGR_AppData.HkTelemetryPkt.DeviceHK.DeviceConfig  = 0;
-    MGR_AppData.HkTelemetryPkt.DeviceHK.DeviceStatus  = 0;
+    MGR_RestoreHkFile(&MGR_AppData.HkTelemetryPkt);
 
     /*
      ** Send an information event that the app has initialized.
@@ -236,11 +214,9 @@ void MGR_ProcessCommandPacket(void)
 
 /*
 ** Process ground commands
-** TODO: Add additional commands required by the specific component
 */
 void MGR_ProcessGroundCommand(void)
 {
-    int32             status      = OS_SUCCESS;
     CFE_SB_MsgId_t    MsgId       = CFE_SB_INVALID_MSG_ID;
     CFE_MSG_FcnCode_t CommandCode = 0;
 
@@ -286,56 +262,6 @@ void MGR_ProcessGroundCommand(void)
             break;
 
         /*
-        ** Enable Command
-        */
-        case MGR_ENABLE_CC:
-            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_NoArgs_cmd_t)) == OS_SUCCESS)
-            {
-                CFE_EVS_SendEvent(MGR_CMD_ENABLE_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                  "MGR: Enable command received");
-                MGR_Enable();
-            }
-            break;
-
-        /*
-        ** Disable Command
-        */
-        case MGR_DISABLE_CC:
-            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_NoArgs_cmd_t)) == OS_SUCCESS)
-            {
-                CFE_EVS_SendEvent(MGR_CMD_DISABLE_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                  "MGR: Disable command received");
-                MGR_Disable();
-            }
-            break;
-
-        /*
-        ** TODO: Edit and add more command codes as appropriate for the application
-        ** Set Configuration Command
-        ** Note that this is an example of a command that has additional arguments
-        */
-        case MGR_CONFIG_CC:
-            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_Config_cmd_t)) == OS_SUCCESS)
-            {
-                uint32_t config = ntohl(
-                    ((MGR_Config_cmd_t *)MGR_AppData.MsgPtr)
-                        ->DeviceCfg); // command is defined as big-endian... need to convert to host representation
-                CFE_EVS_SendEvent(MGR_CMD_CONFIG_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                  "MGR: Configuration command received: %u", config);
-                /* Command device to send HK */
-                status = MGR_CommandDevice(&MGR_AppData.MgrUart, MGR_DEVICE_CFG_CMD, config);
-                if (status == OS_SUCCESS)
-                {
-                    MGR_AppData.HkTelemetryPkt.DeviceCount++;
-                }
-                else
-                {
-                    MGR_AppData.HkTelemetryPkt.DeviceErrorCount++;
-                }
-            }
-            break;
-
-        /*
         ** Invalid Command Codes
         */
         default:
@@ -351,7 +277,6 @@ void MGR_ProcessGroundCommand(void)
 
 /*
 ** Process Telemetry Request - Triggered in response to a telemetery request
-** TODO: Add additional telemetry required by the specific component
 */
 void MGR_ProcessTelemetryRequest(void)
 {
@@ -367,10 +292,6 @@ void MGR_ProcessTelemetryRequest(void)
     {
         case MGR_REQ_HK_TLM:
             MGR_ReportHousekeeping();
-            break;
-
-        case MGR_REQ_DATA_TLM:
-            MGR_ReportDeviceTelemetry();
             break;
 
         /*
@@ -392,59 +313,20 @@ void MGR_ProcessTelemetryRequest(void)
 */
 void MGR_ReportHousekeeping(void)
 {
-    int32 status = OS_SUCCESS;
+    OS_time_t temp_time;
 
-    /* Check that device is enabled */
-    if (MGR_AppData.HkTelemetryPkt.DeviceEnabled == MGR_DEVICE_ENABLED)
-    {
-        status = MGR_RequestHK(&MGR_AppData.MgrUart,
-                                  (MGR_Device_HK_tlm_t *)&MGR_AppData.HkTelemetryPkt.DeviceHK);
-        if (status == OS_SUCCESS)
-        {
-            MGR_AppData.HkTelemetryPkt.DeviceCount++;
-        }
-        else
-        {
-            MGR_AppData.HkTelemetryPkt.DeviceErrorCount++;
-            CFE_EVS_SendEvent(MGR_REQ_HK_ERR_EID, CFE_EVS_EventType_ERROR,
-                              "MGR: Request device HK reported error %d", status);
-        }
-    }
-    /* Intentionally do not report errors if disabled */
+    /* Update stored time */
+    OS_GetLocalTime(&temp_time);
+    MGR_AppData.HkTelemetryPkt.TicsMET = temp_time.ticks;
 
     /* Time stamp and publish housekeeping telemetry */
     CFE_SB_TimeStampMsg((CFE_MSG_Message_t *)&MGR_AppData.HkTelemetryPkt);
     CFE_SB_TransmitMsg((CFE_MSG_Message_t *)&MGR_AppData.HkTelemetryPkt, true);
-    return;
-}
 
-/*
-** Collect and Report Device Telemetry
-*/
-void MGR_ReportDeviceTelemetry(void)
-{
-    int32 status = OS_SUCCESS;
+    /* Save Hk file*/
+    MGR_SaveHkFile(&MGR_AppData.HkTelemetryPkt);
+    OS_printf("MGR: MET = %ld \n", MGR_AppData.HkTelemetryPkt.TicsMET);
 
-    /* Check that device is enabled */
-    if (MGR_AppData.HkTelemetryPkt.DeviceEnabled == MGR_DEVICE_ENABLED)
-    {
-        status = MGR_RequestData(&MGR_AppData.MgrUart,
-                                    (MGR_Device_Data_tlm_t *)&MGR_AppData.DevicePkt.Mgr);
-        if (status == OS_SUCCESS)
-        {
-            MGR_AppData.HkTelemetryPkt.DeviceCount++;
-            /* Time stamp and publish data telemetry */
-            CFE_SB_TimeStampMsg((CFE_MSG_Message_t *)&MGR_AppData.DevicePkt);
-            CFE_SB_TransmitMsg((CFE_MSG_Message_t *)&MGR_AppData.DevicePkt, true);
-        }
-        else
-        {
-            MGR_AppData.HkTelemetryPkt.DeviceErrorCount++;
-            CFE_EVS_SendEvent(MGR_REQ_DATA_ERR_EID, CFE_EVS_EventType_ERROR,
-                              "MGR: Request device data reported error %d", status);
-        }
-    }
-    /* Intentionally do not report errors if disabled */
     return;
 }
 
@@ -455,90 +337,106 @@ void MGR_ResetCounters(void)
 {
     MGR_AppData.HkTelemetryPkt.CommandErrorCount = 0;
     MGR_AppData.HkTelemetryPkt.CommandCount      = 0;
-    MGR_AppData.HkTelemetryPkt.DeviceErrorCount  = 0;
-    MGR_AppData.HkTelemetryPkt.DeviceCount       = 0;
     return;
 }
 
 /*
-** Enable Component
-** TODO: Edit for your specific component implementation
+** Save the MGR Hk data to a file
 */
-void MGR_Enable(void)
+void MGR_SaveHkFile(MGR_Hk_tlm_t *hk)
 {
     int32 status = OS_SUCCESS;
+    osal_id_t osal_fd;
 
-    /* Check that device is disabled */
-    if (MGR_AppData.HkTelemetryPkt.DeviceEnabled == MGR_DEVICE_DISABLED)
+    status = OS_OpenCreate(&osal_fd, MGR_CFG_FILE_PATH, OS_FILE_FLAG_CREATE | OS_FILE_FLAG_TRUNCATE, OS_READ_WRITE);
+    if (status != OS_SUCCESS)
+    {
+        OS_printf("MGR Error: Cannot Open %s for writing. Error = %d \n", MGR_CFG_FILE_PATH, (int32) osal_fd);
+    }
+    else
+    {
+        status = OS_write(osal_fd, hk, sizeof(MGR_Hk_tlm_t));
+        if (status != sizeof(MGR_Hk_tlm_t))
+        {
+            OS_printf("MGR Error: Hk packet not written to file\n");
+        }
+        OS_close(osal_fd);
+    }
+}
+
+/*
+** Restore the MGR HK data from a file
+*/
+void MGR_RestoreHkFile(MGR_Hk_tlm_t *hk)
+{
+    int32 status = OS_SUCCESS;
+    osal_id_t osal_fd;
+    int32  size_read;
+    OS_time_t temp_time;
+
+    status = OS_OpenCreate(&osal_fd, MGR_CFG_FILE_PATH, OS_FILE_FLAG_CREATE | OS_FILE_FLAG_TRUNCATE, OS_READ_ONLY);
+    if (status != OS_SUCCESS)
+    {
+        OS_printf("MGR: Restore Hk packet Error: Cannot Open %s for reading\n", MGR_CFG_FILE_PATH);
+        OS_printf("      Cleaning up and recreating file\n");
+        /* Clean up and re-create the file */
+        OS_remove(MGR_CFG_FILE_PATH);
+        OS_OpenCreate(&osal_fd, MGR_CFG_FILE_PATH, OS_FILE_FLAG_CREATE | OS_FILE_FLAG_TRUNCATE, OS_READ_WRITE);
+        OS_write(osal_fd, hk, sizeof(MGR_Hk_tlm_t));
+        OS_close(osal_fd);
+    }
+    else
+    {
+        size_read = OS_read(osal_fd, hk, sizeof(MGR_Hk_tlm_t));
+        if (size_read == 0)
+        {
+            OS_printf("MGR: Restore Hk packet error: OS_read returned zero\n");
+            memset(hk, 0, sizeof(MGR_Hk_tlm_t));
+        }
+        else if ( size_read == -1 )
+        {
+            OS_printf("MGR: Restore Hk packet error: OS_read returned error\n");
+            memset(hk, 0, sizeof(MGR_Hk_tlm_t));
+        }
+        OS_close(osal_fd);
+    }
+
+    /*
+    ** Make sure the SpacecraftMode is valid
+    **/
+    if (hk->SpacecraftMode < MGR_SAFE_MODE || hk->SpacecraftMode > MGR_SAFE_REBOOT_MODE)
+    {
+        hk->SpacecraftMode = MGR_SAFE_REBOOT_MODE;
+        hk->AnomRebootCtr++;
+        OS_printf("MGR: Restore Hk Packet error: Spacecraft Mode invalid\n");
+    }
+    else if (hk->SpacecraftMode == MGR_SAFE_MODE)
+    {
+        hk->SpacecraftMode = MGR_SAFE_REBOOT_MODE;
+        hk->AnomRebootCtr++;
+        OS_printf("MGR: Restore Hk Packet error: Anomalous Reboot into Safe Mode\n");
+    }
+    else if ((hk->SpacecraftMode == MGR_SCIENCE_ACTIVE_MODE) || (hk->SpacecraftMode == MGR_SCIENCE_IDLE_MODE))
+    {
+        hk->SpacecraftMode = MGR_SAFE_REBOOT_MODE;
+        hk->AnomRebootCtr++;
+        OS_printf("MGR: Restore Hk Packet error: Anomalous Reboot into Science Mode\n");
+    }
+    else
     {
         /*
-        ** Initialize hardware interface data
-        ** TODO: Make specific to your application depending on protocol in use
-        ** Note that other components provide examples for the different protocols available
+        ** Increment the boot counter
         */
-        MGR_AppData.MgrUart.deviceString  = MGR_CFG_STRING;
-        MGR_AppData.MgrUart.handle        = MGR_CFG_HANDLE;
-        MGR_AppData.MgrUart.isOpen        = PORT_CLOSED;
-        MGR_AppData.MgrUart.baud          = MGR_CFG_BAUDRATE_HZ;
-        MGR_AppData.MgrUart.access_option = uart_access_flag_RDWR;
+        hk->BootCounter++;
+    }
 
-        /* Open device specific protocols */
-        status = uart_init_port(&MGR_AppData.MgrUart);
-        if (status == OS_SUCCESS)
-        {
-            MGR_AppData.HkTelemetryPkt.DeviceCount++;
-            MGR_AppData.HkTelemetryPkt.DeviceEnabled = MGR_DEVICE_ENABLED;
-            CFE_EVS_SendEvent(MGR_ENABLE_INF_EID, CFE_EVS_EventType_INFORMATION, "MGR: Device enabled");
-        }
-        else
-        {
-            MGR_AppData.HkTelemetryPkt.DeviceErrorCount++;
-            CFE_EVS_SendEvent(MGR_UART_INIT_ERR_EID, CFE_EVS_EventType_ERROR,
-                              "MGR: UART port initialization error %d", status);
-        }
-    }
-    else
-    {
-        MGR_AppData.HkTelemetryPkt.DeviceErrorCount++;
-        CFE_EVS_SendEvent(MGR_ENABLE_ERR_EID, CFE_EVS_EventType_ERROR,
-                          "MGR: Device enable failed, already enabled");
-    }
-    return;
-}
-
-/*
-** Disable Component
-** TODO: Edit for your specific component implementation
-*/
-void MGR_Disable(void)
-{
-    int32 status = OS_SUCCESS;
-
-    /* Check that device is enabled */
-    if (MGR_AppData.HkTelemetryPkt.DeviceEnabled == MGR_DEVICE_ENABLED)
-    {
-        /* Open device specific protocols */
-        status = uart_close_port(&MGR_AppData.MgrUart);
-        if (status == OS_SUCCESS)
-        {
-            MGR_AppData.HkTelemetryPkt.DeviceCount++;
-            MGR_AppData.HkTelemetryPkt.DeviceEnabled = MGR_DEVICE_DISABLED;
-            CFE_EVS_SendEvent(MGR_DISABLE_INF_EID, CFE_EVS_EventType_INFORMATION, "MGR: Device disabled");
-        }
-        else
-        {
-            MGR_AppData.HkTelemetryPkt.DeviceErrorCount++;
-            CFE_EVS_SendEvent(MGR_UART_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR, "MGR: UART port close error %d",
-                              status);
-        }
-    }
-    else
-    {
-        MGR_AppData.HkTelemetryPkt.DeviceErrorCount++;
-        CFE_EVS_SendEvent(MGR_DISABLE_ERR_EID, CFE_EVS_EventType_ERROR,
-                          "MGR: Device disable failed, already disabled");
-    }
-    return;
+    /*
+     * Set the time with the boot offset
+    */
+    OS_GetLocalTime(&temp_time);
+    temp_time.ticks = temp_time.ticks + MGR_CFG_REBOOT_MET_TIC_OFFSET + hk->TicsMET;
+    OS_SetLocalTime(&temp_time);
+    OS_printf("MGR: Calling OS_SetLocalTime with ticks: %ld\n", hk->TicsMET);
 }
 
 /*

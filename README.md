@@ -9,6 +9,8 @@ MGR will store mission critical telemetry with the capability to store and load 
 Other mission specific functionality to ease operational use may be included as it is identified.
 The available FSW is for use in the core Flight System (cFS) while the GSW supports COSMOS.
 
+One example use not yet demonstrated of the MGR app is to handle deployable devices such as solar arrays or antennas.
+
 
 # Configuration
 The various configuration parameters available for each portion of the component are captured below.

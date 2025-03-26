@@ -12,25 +12,27 @@
 ** Include Files
 */
 #include "cfe.h"
-#include "mgr_device.h"
+#include "device_cfg.h"
 #include "mgr_events.h"
 #include "mgr_platform_cfg.h"
 #include "mgr_perfids.h"
 #include "mgr_msg.h"
 #include "mgr_msgids.h"
 #include "mgr_version.h"
-#include "hwlib.h"
 
 /*
 ** Specified pipe depth - how many messages will be queued in the pipe
 */
 #define MGR_PIPE_DEPTH 32
 
-/*
-** Enabled and Disabled Definitions
+/* 
+** Spacecraft Modes
 */
-#define MGR_DEVICE_DISABLED 0
-#define MGR_DEVICE_ENABLED  1
+#define MGR_SAFE_MODE 1
+#define MGR_SAFE_REBOOT_MODE 2
+#define MGR_SCIENCE_ACTIVE_MODE 3
+#define MGR_SCIENCE_IDLE_MODE 4
+#define MGR_SCIENCE_REBOOT_MODE 5
 
 /*
 ** MGR global data structure
@@ -53,18 +55,6 @@ typedef struct
     CFE_SB_PipeId_t    CmdPipe;   /* Pipe Id for HK command pipe */
     uint32             RunStatus; /* App run status for controlling the application state */
 
-    /*
-     ** Device data
-     ** TODO: Make specific to your application
-     */
-    MGR_Device_tlm_t DevicePkt; /* Device specific data packet */
-
-    /*
-    ** Device protocol
-    ** TODO: Make specific to your application
-    */
-    uart_info_t MgrUart; /* Hardware protocol definition */
-
 } MGR_AppData_t;
 
 /*
@@ -86,10 +76,9 @@ void  MGR_ProcessCommandPacket(void);
 void  MGR_ProcessGroundCommand(void);
 void  MGR_ProcessTelemetryRequest(void);
 void  MGR_ReportHousekeeping(void);
-void  MGR_ReportDeviceTelemetry(void);
 void  MGR_ResetCounters(void);
-void  MGR_Enable(void);
-void  MGR_Disable(void);
+void  MGR_SaveHkFile(MGR_Hk_tlm_t* hk);
+void  MGR_RestoreHkFile(MGR_Hk_tlm_t* hk);
 int32 MGR_VerifyCmdLength(CFE_MSG_Message_t *msg, uint16 expected_length);
 
 #endif /* _MGR_APP_H_ */
