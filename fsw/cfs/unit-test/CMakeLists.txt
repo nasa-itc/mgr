@@ -18,7 +18,7 @@
 #    code units.
 #
 
-add_cfe_coverage_stubs(mgr-internal stubs/mgr_device_stubs.c stubs/libuart_stubs.c) 
+add_cfe_coverage_stubs(mgr-internal stubs/mgr_device_stubs.c) 
 target_link_libraries(coverage-mgr-internal-stubs ut_core_api_stubs ut_assert)
 target_include_directories(coverage-mgr-internal-stubs PUBLIC $<TARGET_PROPERTY:mgr,INCLUDE_DIRECTORIES>)
 

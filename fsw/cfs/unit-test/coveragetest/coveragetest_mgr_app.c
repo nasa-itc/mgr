@@ -267,12 +267,11 @@ void Test_MGR_ProcessTelemetryRequest(void)
     CFE_SB_MsgId_t    TestMsgId;
     UT_CheckEvent_t   EventTest;
     CFE_MSG_FcnCode_t FcnCode;
-    FcnCode = MGR_REQ_DATA_TLM;
+    FcnCode = MGR_REQ_HK_TLM;
 
     TestMsgId = CFE_SB_ValueToMsgId(MGR_CMD_MID);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDeferredRetcode(UT_KEY(MGR_RequestData), 1, OS_SUCCESS);
 
     UT_CheckEvent_Setup(&EventTest, MGR_REQ_DATA_ERR_EID, NULL);
     MGR_ProcessTelemetryRequest();
@@ -357,9 +356,6 @@ void Test_MGR_ProcessGroundCommand(void)
         CFE_SB_Buffer_t     SBBuf;
         MGR_NoArgs_cmd_t Noop;
         MGR_NoArgs_cmd_t Reset;
-        MGR_NoArgs_cmd_t Enable;
-        MGR_NoArgs_cmd_t Disable;
-        MGR_Config_cmd_t Config;
     } TestMsg;
     UT_CheckEvent_t EventTest;
 
@@ -386,7 +382,7 @@ void Test_MGR_ProcessGroundCommand(void)
                   (unsigned int)EventTest.MatchCount);
     /* test failure of command length */
     FcnCode = MGR_NOOP_CC;
-    Size    = sizeof(TestMsg.Config);
+    Size    = (size_t) 99;
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
@@ -395,7 +391,6 @@ void Test_MGR_ProcessGroundCommand(void)
     UT_CheckEvent_Setup(&EventTest, MGR_LEN_ERR_EID, NULL);
     MGR_ProcessGroundCommand();
     UtAssert_True(EventTest.MatchCount == 1, "MGR_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
-
     /* test dispatch of RESET */
     FcnCode = MGR_RESET_COUNTERS_CC;
     Size    = sizeof(TestMsg.Reset);
@@ -408,7 +403,7 @@ void Test_MGR_ProcessGroundCommand(void)
                   (unsigned int)EventTest.MatchCount);
     /* test failure of command length */
     FcnCode = MGR_RESET_COUNTERS_CC;
-    Size    = sizeof(TestMsg.Config);
+    Size    = (size_t) 99;
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
@@ -417,88 +412,6 @@ void Test_MGR_ProcessGroundCommand(void)
     UT_CheckEvent_Setup(&EventTest, MGR_LEN_ERR_EID, NULL);
     MGR_ProcessGroundCommand();
     UtAssert_True(EventTest.MatchCount == 1, "MGR_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
-
-    /* test dispatch of ENABLE */
-    FcnCode = MGR_ENABLE_CC;
-    Size    = sizeof(TestMsg.Enable);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_CheckEvent_Setup(&EventTest, MGR_CMD_ENABLE_INF_EID, NULL);
-    MGR_ProcessGroundCommand();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR_CMD_ENABLE_INF_EID generated (%u)",
-                  (unsigned int)EventTest.MatchCount);
-    /* test failure of command length */
-    FcnCode = MGR_ENABLE_CC;
-    Size    = sizeof(TestMsg.Config);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_CheckEvent_Setup(&EventTest, MGR_LEN_ERR_EID, NULL);
-    MGR_ProcessGroundCommand();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
-
-    /* test dispatch of DISABLE */
-    FcnCode = MGR_DISABLE_CC;
-    Size    = sizeof(TestMsg.Disable);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_CheckEvent_Setup(&EventTest, MGR_CMD_DISABLE_INF_EID, NULL);
-    MGR_ProcessGroundCommand();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR_CMD_DISABLE_INF_EID generated (%u)",
-                  (unsigned int)EventTest.MatchCount);
-    /* test failure of command length */
-    FcnCode = MGR_DISABLE_CC;
-    Size    = sizeof(TestMsg.Config);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_CheckEvent_Setup(&EventTest, MGR_LEN_ERR_EID, NULL);
-    MGR_ProcessGroundCommand();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
-
-    /* test dispatch of CONFIG */
-    FcnCode = MGR_CONFIG_CC;
-    Size    = sizeof(TestMsg.Config);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_CheckEvent_Setup(&EventTest, MGR_CMD_CONFIG_INF_EID, NULL);
-    UT_SetDeferredRetcode(UT_KEY(MGR_CommandDevice), 1, OS_ERROR);
-    CFE_MSG_Message_t msgPtr;
-    MGR_AppData.MsgPtr = &msgPtr;
-    MGR_ProcessGroundCommand();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR_CMD_CONFIG_INF_EID generated (%u)",
-                  (unsigned int)EventTest.MatchCount);
-    /* test failure of command length */
-    FcnCode = MGR_CONFIG_CC;
-    Size    = sizeof(TestMsg.Reset);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_CheckEvent_Setup(&EventTest, MGR_LEN_ERR_EID, NULL);
-    MGR_ProcessGroundCommand();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
-
-    FcnCode = MGR_CONFIG_CC;
-    Size    = sizeof(TestMsg.Config);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_CheckEvent_Setup(&EventTest, MGR_CMD_CONFIG_INF_EID, NULL);
-    UT_SetDeferredRetcode(UT_KEY(MGR_CommandDevice), 1, OS_SUCCESS);
-    MGR_AppData.MsgPtr = &msgPtr;
-    MGR_ProcessGroundCommand();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR_CMD_CONFIG_INF_EID generated (%u)",
-                  (unsigned int)EventTest.MatchCount);
-
     /* test an invalid CC */
     FcnCode = 99;
     Size    = sizeof(TestMsg.Noop);
@@ -528,8 +441,6 @@ void Test_MGR_ReportHousekeeping(void)
     /* Set up to capture timestamp message address */
     UT_SetDataBuffer(UT_KEY(CFE_SB_TimeStampMsg), &MsgTimestamp, sizeof(MsgTimestamp), false);
 
-    MGR_AppData.HkTelemetryPkt.DeviceEnabled = MGR_DEVICE_ENABLED;
-
     /* Call unit under test, NULL pointer confirms command access is through APIs */
     MGR_ReportHousekeeping();
 
@@ -542,11 +453,6 @@ void Test_MGR_ReportHousekeeping(void)
     UtAssert_True(UT_GetStubCount(UT_KEY(CFE_SB_TimeStampMsg)) == 1, "CFE_SB_TimeStampMsg() called once");
     UtAssert_True(MsgTimestamp == &MGR_AppData.HkTelemetryPkt.TlmHeader.Msg,
                   "CFE_SB_TimeStampMsg() address matches expected");
-
-    UT_CheckEvent_t EventTest;
-    UT_SetDeferredRetcode(UT_KEY(MGR_RequestHK), 1, OS_ERROR);
-    MGR_ReportHousekeeping();
-    UT_CheckEvent_Setup(&EventTest, MGR_REQ_HK_ERR_EID, "MGR: Request device HK reported error -1");
 }
 
 void Test_MGR_VerifyCmdLength(void)
@@ -589,69 +495,6 @@ void Test_MGR_VerifyCmdLength(void)
     UtAssert_True(EventTest.MatchCount == 1, "MGR_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
 }
 
-void Test_MGR_ReportDeviceTelemetry(void)
-{
-    MGR_ReportDeviceTelemetry();
-
-    UT_SetDeferredRetcode(UT_KEY(MGR_RequestData), 1, OS_SUCCESS);
-    MGR_ReportDeviceTelemetry();
-
-    UT_SetDeferredRetcode(UT_KEY(MGR_RequestData), 1, OS_ERROR);
-    MGR_ReportDeviceTelemetry();
-
-    MGR_AppData.HkTelemetryPkt.DeviceEnabled = MGR_DEVICE_DISABLED;
-    MGR_ReportDeviceTelemetry();
-}
-
-void Test_MGR_Enable(void)
-{
-    UT_CheckEvent_t EventTest;
-
-    UT_CheckEvent_Setup(&EventTest, MGR_ENABLE_INF_EID, NULL);
-    MGR_AppData.HkTelemetryPkt.DeviceEnabled = MGR_DEVICE_DISABLED;
-    UT_SetDeferredRetcode(UT_KEY(uart_init_port), 1, OS_SUCCESS);
-    MGR_Enable();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR: Device enabled (%u)", (unsigned int)EventTest.MatchCount);
-
-    UT_CheckEvent_Setup(&EventTest, MGR_UART_INIT_ERR_EID, NULL);
-    MGR_AppData.HkTelemetryPkt.DeviceEnabled = MGR_DEVICE_DISABLED;
-    UT_SetDeferredRetcode(UT_KEY(uart_init_port), 1, OS_ERROR);
-    MGR_Enable();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR: UART port initialization error (%u)",
-                  (unsigned int)EventTest.MatchCount);
-
-    UT_CheckEvent_Setup(&EventTest, MGR_ENABLE_ERR_EID, NULL);
-    MGR_AppData.HkTelemetryPkt.DeviceEnabled = MGR_DEVICE_ENABLED;
-    UT_SetDeferredRetcode(UT_KEY(uart_init_port), 1, OS_ERROR);
-    MGR_Enable();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR: Device enable failed, already enabled (%u)",
-                  (unsigned int)EventTest.MatchCount);
-}
-
-void Test_MGR_Disable(void)
-{
-    UT_CheckEvent_t EventTest;
-
-    UT_CheckEvent_Setup(&EventTest, MGR_DISABLE_INF_EID, NULL);
-    MGR_AppData.HkTelemetryPkt.DeviceEnabled = MGR_DEVICE_ENABLED;
-    UT_SetDeferredRetcode(UT_KEY(uart_close_port), 1, OS_SUCCESS);
-    MGR_Disable();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR: Device disabled (%u)", (unsigned int)EventTest.MatchCount);
-
-    UT_CheckEvent_Setup(&EventTest, MGR_UART_CLOSE_ERR_EID, NULL);
-    MGR_AppData.HkTelemetryPkt.DeviceEnabled = MGR_DEVICE_ENABLED;
-    UT_SetDeferredRetcode(UT_KEY(uart_close_port), 1, OS_ERROR);
-    MGR_Disable();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR: UART port close error (%u)", (unsigned int)EventTest.MatchCount);
-
-    UT_CheckEvent_Setup(&EventTest, MGR_DISABLE_ERR_EID, NULL);
-    MGR_AppData.HkTelemetryPkt.DeviceEnabled = MGR_DEVICE_DISABLED;
-    UT_SetDeferredRetcode(UT_KEY(uart_close_port), 1, OS_ERROR);
-    MGR_Disable();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR: Device disable failed, already disabled (%u)",
-                  (unsigned int)EventTest.MatchCount);
-}
-
 /*
  * Setup function prior to every test
  */
@@ -676,8 +519,5 @@ void UtTest_Setup(void)
     ADD_TEST(MGR_ProcessGroundCommand);
     ADD_TEST(MGR_ReportHousekeeping);
     ADD_TEST(MGR_VerifyCmdLength);
-    ADD_TEST(MGR_ReportDeviceTelemetry);
     ADD_TEST(MGR_ProcessTelemetryRequest);
-    ADD_TEST(MGR_Enable);
-    ADD_TEST(MGR_Disable);
 }

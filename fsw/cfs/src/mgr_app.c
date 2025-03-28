@@ -375,7 +375,7 @@ void MGR_ReportHousekeeping(void)
 
     /* Save Hk file*/
     MGR_SaveHkFile();
-    OS_printf("MGR: TimeTics = %ld", MGR_AppData.HkTelemetryPkt.TimeTics);
+    OS_printf("MGR: TimeTics = %ld \n", MGR_AppData.HkTelemetryPkt.TimeTics);
 
     return;
 }
@@ -454,31 +454,18 @@ void MGR_RestoreHkFile(void)
     OS_close(osal_fd);
 
     /*
-    ** Make sure the SpacecraftMode is valid
+    ** Make sure the SpacecraftMode is valid and set boot counters
     **/
-    if ((MGR_AppData.HkTelemetryPkt.SpacecraftMode < MGR_SAFE_MODE) || (MGR_AppData.HkTelemetryPkt.SpacecraftMode > MGR_SAFE_REBOOT_MODE))
+    if ((MGR_AppData.HkTelemetryPkt.SpacecraftMode != MGR_SAFE_REBOOT_MODE) && 
+        (MGR_AppData.HkTelemetryPkt.SpacecraftMode != MGR_SCIENCE_REBOOT_MODE)
+       )
     {
         MGR_AppData.HkTelemetryPkt.SpacecraftMode = MGR_SAFE_REBOOT_MODE;
         MGR_AppData.HkTelemetryPkt.AnomRebootCtr++;
-        OS_printf("MGR: Restore Hk Packet error: Spacecraft mode invalid, going to Safe Mode\n");
-    }
-    else if (MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SAFE_MODE)
-    {
-        MGR_AppData.HkTelemetryPkt.SpacecraftMode = MGR_SAFE_REBOOT_MODE;
-        MGR_AppData.HkTelemetryPkt.AnomRebootCtr++;
-        OS_printf("MGR: Restore Hk Packet error: Anomalous reboot into Safe Mode\n");
-    }
-    else if ((MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_ACTIVE_MODE) || (MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_IDLE_MODE))
-    {
-        MGR_AppData.HkTelemetryPkt.SpacecraftMode = MGR_SAFE_REBOOT_MODE;
-        MGR_AppData.HkTelemetryPkt.AnomRebootCtr++;
-        OS_printf("MGR: Restore Hk Packet error: Anomalous reboot into Science Mode\n");
+        OS_printf("MGR: Restore Hk Packet error: Anomalous reboot, returning to SAFE MODE\n");
     }
     else
     {
-        /*
-        ** Increment the boot counter
-        */
         MGR_AppData.HkTelemetryPkt.BootCounter++;
     }
 
