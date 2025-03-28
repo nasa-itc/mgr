@@ -1,5 +1,5 @@
 TELEMETRY MGR MGR_HK_TLM LITTLE_ENDIAN "MGR_Hk_tlm_t"
-  APPEND_ID_ITEM CCSDS_STREAMID       16 UINT 0x0917  "CCSDS Packet Identification" BIG_ENDIAN
+  APPEND_ID_ITEM CCSDS_STREAMID       16 UINT 0x08F8  "CCSDS Packet Identification" BIG_ENDIAN
   APPEND_ITEM    CCSDS_SEQUENCE       16 UINT         "CCSDS Packet Sequence Control" BIG_ENDIAN
   APPEND_ITEM    CCSDS_LENGTH         16 UINT         "CCSDS Packet Data Length" BIG_ENDIAN
   APPEND_ITEM    CCSDS_SECONDS        32 UINT         "CCSDS Telemetry Secondary Header (seconds)" BIG_ENDIAN
@@ -7,38 +7,12 @@ TELEMETRY MGR MGR_HK_TLM LITTLE_ENDIAN "MGR_Hk_tlm_t"
   APPEND_ITEM    CCSDS_SPARE          32 UINT         ""
   APPEND_ITEM    CMD_ERR_COUNT         8 UINT         "Command Error Count"
   APPEND_ITEM    CMD_COUNT             8 UINT         "Command Count"
-  APPEND_ITEM    DEVICE_ERR_COUNT      8 UINT         "Device Command Error Count"
-  APPEND_ITEM    DEVICE_COUNT          8 UINT         "Device Command Count"
-  APPEND_ITEM    DEVICE_ENABLED        8 UINT         "Device Enable Status"
-    STATE DISABLED 0
-    STATE ENABLED  1 
-  # MGR_Device_HK_tlm_t
-  APPEND_ITEM    DEVICE_COUNTER       32 UINT         "Reported Device Command Counter"
-  APPEND_ITEM    DEVICE_CONFIG        32 UINT         "Reported Device Configuration"
-  APPEND_ITEM    DEVICE_STATUS        32 UINT         "Reported Device Status"
-
-TELEMETRY MGR MGR_DATA_TLM LITTLE_ENDIAN "MGR_Device_tlm_t"
-  APPEND_ID_ITEM CCSDS_STREAMID       16 UINT 0x0918  "CCSDS Packet Identification" BIG_ENDIAN
-  APPEND_ITEM    CCSDS_SEQUENCE       16 UINT         "CCSDS Packet Sequence Control" BIG_ENDIAN
-  APPEND_ITEM    CCSDS_LENGTH         16 UINT         "CCSDS Packet Data Length" BIG_ENDIAN
-  APPEND_ITEM    CCSDS_SECONDS        32 UINT         "CCSDS Telemetry Secondary Header (seconds)" BIG_ENDIAN
-  APPEND_ITEM    CCSDS_SUBSECS        16 UINT         "CCSDS Telemetry Secondary Header (subseconds)" BIG_ENDIAN
-  APPEND_ITEM    CCSDS_SPARE          32 UINT         ""
-  # MGR_Device_Data_tlm_t
-  APPEND_ITEM    DEVICE_COUNTER       32 UINT         "Reported Device Command Counter"
-  APPEND_ITEM    RAW_MGR_X         16 UINT         "Raw mgr data x component (1-65535)"
-  APPEND_ITEM    RAW_MGR_Y         16 UINT         "Raw mgr data y component (1-65535)"
-  APPEND_ITEM    RAW_MGR_Z         16 UINT         "Raw mgr data z component (1-65535)"
-#  APPEND_ITEM    PAD                  16 UINT         "Because the packed struct it came from has a stride address of 32 and cFS does not serialize"
-  APPEND_ITEM    MGR_X              0 DERIVED      "Mgr data unit vector x component (-1.0 to 1.0)"
-    GENERIC_READ_CONVERSION_START FLOAT 32
-      (packet.read("RAW_MGR_X") - 32768.0)/32767.0
-    GENERIC_READ_CONVERSION_END
-  APPEND_ITEM    MGR_Y              0 DERIVED      "Mgr data unit vector y component (-1.0 to 1.0)"
-    GENERIC_READ_CONVERSION_START FLOAT 32
-      (packet.read("RAW_MGR_Y") - 32768.0)/32767.0
-    GENERIC_READ_CONVERSION_END
-  APPEND_ITEM    MGR_Z              0 DERIVED      "Mgr data unit vector z component (-1.0 to 1.0)"
-    GENERIC_READ_CONVERSION_START FLOAT 32
-      (packet.read("RAW_MGR_Z") - 32768.0)/32767.0
-    GENERIC_READ_CONVERSION_END
+  APPEND_ITEM    SPACECRAFT_MODE       8 UINT         "Spacecraft Mode"
+    STATE SAFE 1
+    STATE SAFE_REBOOT 2
+    STATE SCIENCE_ACTIVE 3
+    STATE SCIENCE_IDLE 4
+    STATE SCIENCE_REBOOT 5
+  APPEND_ITEM    BOOT_COUNTER         16 UINT         "Boot Count"
+  APPEND_ITEM    ANOM_REBOOT_COUNTER  16 UINT         "Anomalous Boot Count"
+  APPEND_ITEM    TIME_TICS            64 UINT         "Time Tics Offset from J2000"

@@ -15,7 +15,7 @@
 ** Default MGR Configuration
 */
 #ifndef MGR_CFG
-    #define MGR_CFG_REBOOT_MET_TIC_OFFSET 0
+    #define MGR_CFG_REBOOT_TIME_TIC_OFFSET 0
     #define MGR_CFG_FILE_PATH "/data/mgr.bin"
 #endif
 

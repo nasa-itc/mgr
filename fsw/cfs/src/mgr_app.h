@@ -77,8 +77,8 @@ void  MGR_ProcessGroundCommand(void);
 void  MGR_ProcessTelemetryRequest(void);
 void  MGR_ReportHousekeeping(void);
 void  MGR_ResetCounters(void);
-void  MGR_SaveHkFile(MGR_Hk_tlm_t* hk);
-void  MGR_RestoreHkFile(MGR_Hk_tlm_t* hk);
+void  MGR_SaveHkFile(void);
+void  MGR_RestoreHkFile(void);
 int32 MGR_VerifyCmdLength(CFE_MSG_Message_t *msg, uint16 expected_length);
 
 #endif /* _MGR_APP_H_ */

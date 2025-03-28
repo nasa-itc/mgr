@@ -23,6 +23,9 @@
 #define MGR_CMD_ERR_EID         10
 #define MGR_CMD_NOOP_INF_EID    11
 #define MGR_CMD_RESET_INF_EID   12
+#define MGR_CMD_SETMODE_INF_EID 13
+#define MGR_CMD_SETMODE_ERR_EID 14
+#define MGR_CMD_REBOOT_PREP_INF_EID 15
 
 /* Standard telemetry event IDs */
 #define MGR_DEVICE_TLM_ERR_EID 30
