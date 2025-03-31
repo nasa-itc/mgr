@@ -266,18 +266,18 @@ void MGR_ProcessGroundCommand(void)
         ** Set Mode Command
         */
         case MGR_SET_MODE_CC:
-            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_SetMode_cmd_t)) == OS_SUCCESS)
+            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
             {
-                MGR_SetMode_cmd_t* mode_cmd = (MGR_SetMode_cmd_t*) MGR_AppData.MsgPtr;
-                if ((mode_cmd->SpacecraftMode < MGR_SAFE_MODE) || (mode_cmd->SpacecraftMode > MGR_SCIENCE_REBOOT_MODE))
+                MGR_U8_cmd_t* mode_cmd = (MGR_U8_cmd_t*) MGR_AppData.MsgPtr;
+                if ((mode_cmd->U8 < MGR_SAFE_MODE) || (mode_cmd->U8 > MGR_SCIENCE_REBOOT_MODE))
                 {
                     CFE_EVS_SendEvent(MGR_CMD_SETMODE_ERR_EID, CFE_EVS_EventType_ERROR,
                         "MGR: Invalid mode commanded [%d], mode remains [%d]", 
-                        mode_cmd->SpacecraftMode, MGR_AppData.HkTelemetryPkt.SpacecraftMode);
+                        mode_cmd->U8, MGR_AppData.HkTelemetryPkt.SpacecraftMode);
                 }
                 else
                 {
-                    MGR_AppData.HkTelemetryPkt.SpacecraftMode = mode_cmd->SpacecraftMode;
+                    MGR_AppData.HkTelemetryPkt.SpacecraftMode = mode_cmd->U8;
                     CFE_EVS_SendEvent(MGR_CMD_SETMODE_INF_EID, CFE_EVS_EventType_INFORMATION,
                         "MGR: Set mode command received [%d]",
                         MGR_AppData.HkTelemetryPkt.SpacecraftMode);
@@ -308,6 +308,76 @@ void MGR_ProcessGroundCommand(void)
                         "MGR: Reboot prep commanded, mode now SAFE_REBOOT_MODE [%d]", 
                         MGR_AppData.HkTelemetryPkt.SpacecraftMode);
                 }
+            }
+            break;
+
+        /* 
+        ** Science Pass Counter Increment
+        */
+        case MGR_SCI_PASS_INC_CC:
+            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_NoArgs_cmd_t)) == OS_SUCCESS)
+            {
+                MGR_AppData.HkTelemetryPkt.SciPassCount = MGR_AppData.HkTelemetryPkt.SciPassCount + 1;
+                CFE_EVS_SendEvent(MGR_CMD_RESET_SCIPASS_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                "MGR: Increment science pass counter command received, now %d", 
+                                MGR_AppData.HkTelemetryPkt.SciPassCount);
+            }
+            break;
+
+        /* 
+        ** Reset Science Pass Counter
+        */
+        case MGR_SCI_PASS_RESET_CC:
+            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_NoArgs_cmd_t)) == OS_SUCCESS)
+            {
+                MGR_AppData.HkTelemetryPkt.SciPassCount = 0;
+                CFE_EVS_SendEvent(MGR_CMD_RESET_SCIPASS_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                "MGR: RESET science pass counter command received");
+            }
+            break;
+
+        /* 
+        ** Set CONUS Status
+        */
+        case MGR_SET_CONUS_CC:
+            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
+            {
+                MGR_U8_cmd_t* conus_cmd = (MGR_U8_cmd_t*) MGR_AppData.MsgPtr;
+
+                MGR_AppData.HkTelemetryPkt.ConusStatus = conus_cmd->U8;
+                CFE_EVS_SendEvent(MGR_CMD_SETCONUS_INF_EID, CFE_EVS_EventType_INFORMATION,
+                    "MGR: Set CONUS command received [%d]",
+                    MGR_AppData.HkTelemetryPkt.ConusStatus);
+            }
+            break;
+
+        /* 
+        ** Set AK Status
+        */
+        case MGR_SET_AK_CC:
+            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
+            {
+                MGR_U8_cmd_t* ak_cmd = (MGR_U8_cmd_t*) MGR_AppData.MsgPtr;
+
+                MGR_AppData.HkTelemetryPkt.AkStatus = ak_cmd->U8;
+                CFE_EVS_SendEvent(MGR_CMD_SETAK_INF_EID, CFE_EVS_EventType_INFORMATION,
+                    "MGR: Set AK command received [%d]",
+                    MGR_AppData.HkTelemetryPkt.AkStatus);
+            }
+            break;
+
+        /* 
+        ** Set HI Status
+        */
+        case MGR_SET_HI_CC:
+            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
+            {
+                MGR_U8_cmd_t* hi_cmd = (MGR_U8_cmd_t*) MGR_AppData.MsgPtr;
+
+                MGR_AppData.HkTelemetryPkt.HiStatus = hi_cmd->U8;
+                CFE_EVS_SendEvent(MGR_CMD_SETHI_INF_EID, CFE_EVS_EventType_INFORMATION,
+                    "MGR: Set HI command received [%d]",
+                    MGR_AppData.HkTelemetryPkt.HiStatus);
             }
             break;
 
