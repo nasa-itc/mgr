@@ -52,8 +52,8 @@ void MGR_AppMain(void)
         ** Pend on the arrival of the next Software Bus message
         ** Note that this is the standard, but timeouts are available
         */
-        status = CFE_SB_ReceiveBuffer((CFE_SB_Buffer_t **)&MGR_AppData.MsgPtr, MGR_AppData.CmdPipe,
-                                      CFE_SB_PEND_FOREVER);
+        status =
+            CFE_SB_ReceiveBuffer((CFE_SB_Buffer_t **)&MGR_AppData.MsgPtr, MGR_AppData.CmdPipe, CFE_SB_PEND_FOREVER);
 
         /*
         ** Begin performance metrics on anything after this line. This will help to determine
@@ -72,8 +72,7 @@ void MGR_AppMain(void)
         }
         else
         {
-            CFE_EVS_SendEvent(MGR_PIPE_ERR_EID, CFE_EVS_EventType_ERROR, "MGR: SB Pipe Read Error = %d",
-                              (int)status);
+            CFE_EVS_SendEvent(MGR_PIPE_ERR_EID, CFE_EVS_EventType_ERROR, "MGR: SB Pipe Read Error = %d", (int)status);
             MGR_AppData.RunStatus = CFE_ES_RunStatus_APP_ERROR;
         }
     }
@@ -126,8 +125,7 @@ int32 MGR_AppInit(void)
     if (status != CFE_SUCCESS)
     {
         CFE_EVS_SendEvent(MGR_SUB_CMD_ERR_EID, CFE_EVS_EventType_ERROR,
-                          "Error Subscribing to HK Gnd Cmds, MID=0x%04X, RC=0x%08X", MGR_CMD_MID,
-                          (unsigned int)status);
+                          "Error Subscribing to HK Gnd Cmds, MID=0x%04X, RC=0x%08X", MGR_CMD_MID, (unsigned int)status);
         return status;
     }
 
@@ -148,10 +146,10 @@ int32 MGR_AppInit(void)
     ** telemetry that has been defined in the MGR_HkTelemetryPkt for this app.
     ** Note: Intentionally after RestoreHkFile to ensure TlmHeader correct.
     */
-    CFE_MSG_Init(CFE_MSG_PTR(MGR_AppData.HkTelemetryPkt.TlmHeader), 
-        CFE_SB_ValueToMsgId(MGR_HK_TLM_MID), MGR_HK_TLM_LNGTH);
+    CFE_MSG_Init(CFE_MSG_PTR(MGR_AppData.HkTelemetryPkt.TlmHeader), CFE_SB_ValueToMsgId(MGR_HK_TLM_MID),
+                 MGR_HK_TLM_LNGTH);
 
-    /* 
+    /*
     ** Restore Housekeeping Telemetry from the file system.
     ** If the restore fails for any reason, the data will be cleared.
     ** This function will also set some values such as SpacecraftMode if necessary.
@@ -168,8 +166,8 @@ int32 MGR_AppInit(void)
      ** This is useful for debugging the loading of individual applications.
      */
     status = CFE_EVS_SendEvent(MGR_STARTUP_INF_EID, CFE_EVS_EventType_INFORMATION,
-                               "MGR App Initialized. Version %d.%d.%d.%d", MGR_MAJOR_VERSION,
-                               MGR_MINOR_VERSION, MGR_REVISION, MGR_MISSION_REV);
+                               "MGR App Initialized. Version %d.%d.%d.%d", MGR_MAJOR_VERSION, MGR_MINOR_VERSION,
+                               MGR_REVISION, MGR_MISSION_REV);
     if (status != CFE_SUCCESS)
     {
         CFE_ES_WriteToSysLog("MGR: Error sending initialization event: 0x%08X\n", (unsigned int)status);
@@ -244,8 +242,7 @@ void MGR_ProcessGroundCommand(void)
             if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_NoArgs_cmd_t)) == OS_SUCCESS)
             {
                 /* Second, send EVS event on successful receipt ground commands*/
-                CFE_EVS_SendEvent(MGR_CMD_NOOP_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                  "MGR: NOOP command received");
+                CFE_EVS_SendEvent(MGR_CMD_NOOP_INF_EID, CFE_EVS_EventType_INFORMATION, "MGR: NOOP command received");
                 /* Third, do the desired command action if applicable, in the case of NOOP it is no operation */
             }
             break;
@@ -268,19 +265,18 @@ void MGR_ProcessGroundCommand(void)
         case MGR_SET_MODE_CC:
             if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
             {
-                MGR_U8_cmd_t* mode_cmd = (MGR_U8_cmd_t*) MGR_AppData.MsgPtr;
+                MGR_U8_cmd_t *mode_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
                 if ((mode_cmd->U8 < MGR_SAFE_MODE) || (mode_cmd->U8 > MGR_SCIENCE_REBOOT_MODE))
                 {
                     CFE_EVS_SendEvent(MGR_CMD_SETMODE_ERR_EID, CFE_EVS_EventType_ERROR,
-                        "MGR: Invalid mode commanded [%d], mode remains [%d]", 
-                        mode_cmd->U8, MGR_AppData.HkTelemetryPkt.SpacecraftMode);
+                                      "MGR: Invalid mode commanded [%d], mode remains [%d]", mode_cmd->U8,
+                                      MGR_AppData.HkTelemetryPkt.SpacecraftMode);
                 }
                 else
                 {
                     MGR_AppData.HkTelemetryPkt.SpacecraftMode = mode_cmd->U8;
                     CFE_EVS_SendEvent(MGR_CMD_SETMODE_INF_EID, CFE_EVS_EventType_INFORMATION,
-                        "MGR: Set mode command received [%d]",
-                        MGR_AppData.HkTelemetryPkt.SpacecraftMode);
+                                      "MGR: Set mode command received [%d]", MGR_AppData.HkTelemetryPkt.SpacecraftMode);
                 }
             }
             break;
@@ -291,27 +287,26 @@ void MGR_ProcessGroundCommand(void)
         case MGR_REBOOT_PREP_CC:
             if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_NoArgs_cmd_t)) == OS_SUCCESS)
             {
-                if ((MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_ACTIVE_MODE) || 
-                    (MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_IDLE_MODE)   ||
-                    (MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_REBOOT_MODE)
-                   )
+                if ((MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_ACTIVE_MODE) ||
+                    (MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_IDLE_MODE) ||
+                    (MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_REBOOT_MODE))
                 {
                     MGR_AppData.HkTelemetryPkt.SpacecraftMode = MGR_SCIENCE_REBOOT_MODE;
                     CFE_EVS_SendEvent(MGR_CMD_REBOOT_PREP_INF_EID, CFE_EVS_EventType_INFORMATION,
-                        "MGR: Reboot prep commanded, mode now SCIENCE_REBOOT_MODE [%d]", 
-                        MGR_AppData.HkTelemetryPkt.SpacecraftMode);
+                                      "MGR: Reboot prep commanded, mode now SCIENCE_REBOOT_MODE [%d]",
+                                      MGR_AppData.HkTelemetryPkt.SpacecraftMode);
                 }
                 else
                 {
                     MGR_AppData.HkTelemetryPkt.SpacecraftMode = MGR_SAFE_REBOOT_MODE;
                     CFE_EVS_SendEvent(MGR_CMD_REBOOT_PREP_INF_EID, CFE_EVS_EventType_INFORMATION,
-                        "MGR: Reboot prep commanded, mode now SAFE_REBOOT_MODE [%d]", 
-                        MGR_AppData.HkTelemetryPkt.SpacecraftMode);
+                                      "MGR: Reboot prep commanded, mode now SAFE_REBOOT_MODE [%d]",
+                                      MGR_AppData.HkTelemetryPkt.SpacecraftMode);
                 }
             }
             break;
 
-        /* 
+        /*
         ** Science Pass Counter Increment
         */
         case MGR_SCI_PASS_INC_CC:
@@ -319,12 +314,12 @@ void MGR_ProcessGroundCommand(void)
             {
                 MGR_AppData.HkTelemetryPkt.SciPassCount = MGR_AppData.HkTelemetryPkt.SciPassCount + 1;
                 CFE_EVS_SendEvent(MGR_CMD_RESET_SCIPASS_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                "MGR: Increment science pass counter command received, now %d", 
-                                MGR_AppData.HkTelemetryPkt.SciPassCount);
+                                  "MGR: Increment science pass counter command received, now %d",
+                                  MGR_AppData.HkTelemetryPkt.SciPassCount);
             }
             break;
 
-        /* 
+        /*
         ** Reset Science Pass Counter
         */
         case MGR_SCI_PASS_RESET_CC:
@@ -332,52 +327,49 @@ void MGR_ProcessGroundCommand(void)
             {
                 MGR_AppData.HkTelemetryPkt.SciPassCount = 0;
                 CFE_EVS_SendEvent(MGR_CMD_RESET_SCIPASS_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                "MGR: RESET science pass counter command received");
+                                  "MGR: RESET science pass counter command received");
             }
             break;
 
-        /* 
+        /*
         ** Set CONUS Status
         */
         case MGR_SET_CONUS_CC:
             if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
             {
-                MGR_U8_cmd_t* conus_cmd = (MGR_U8_cmd_t*) MGR_AppData.MsgPtr;
+                MGR_U8_cmd_t *conus_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
 
                 MGR_AppData.HkTelemetryPkt.ConusStatus = conus_cmd->U8;
                 CFE_EVS_SendEvent(MGR_CMD_SETCONUS_INF_EID, CFE_EVS_EventType_INFORMATION,
-                    "MGR: Set CONUS command received [%d]",
-                    MGR_AppData.HkTelemetryPkt.ConusStatus);
+                                  "MGR: Set CONUS command received [%d]", MGR_AppData.HkTelemetryPkt.ConusStatus);
             }
             break;
 
-        /* 
+        /*
         ** Set AK Status
         */
         case MGR_SET_AK_CC:
             if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
             {
-                MGR_U8_cmd_t* ak_cmd = (MGR_U8_cmd_t*) MGR_AppData.MsgPtr;
+                MGR_U8_cmd_t *ak_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
 
                 MGR_AppData.HkTelemetryPkt.AkStatus = ak_cmd->U8;
                 CFE_EVS_SendEvent(MGR_CMD_SETAK_INF_EID, CFE_EVS_EventType_INFORMATION,
-                    "MGR: Set AK command received [%d]",
-                    MGR_AppData.HkTelemetryPkt.AkStatus);
+                                  "MGR: Set AK command received [%d]", MGR_AppData.HkTelemetryPkt.AkStatus);
             }
             break;
 
-        /* 
+        /*
         ** Set HI Status
         */
         case MGR_SET_HI_CC:
             if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
             {
-                MGR_U8_cmd_t* hi_cmd = (MGR_U8_cmd_t*) MGR_AppData.MsgPtr;
+                MGR_U8_cmd_t *hi_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
 
                 MGR_AppData.HkTelemetryPkt.HiStatus = hi_cmd->U8;
                 CFE_EVS_SendEvent(MGR_CMD_SETHI_INF_EID, CFE_EVS_EventType_INFORMATION,
-                    "MGR: Set HI command received [%d]",
-                    MGR_AppData.HkTelemetryPkt.HiStatus);
+                                  "MGR: Set HI command received [%d]", MGR_AppData.HkTelemetryPkt.HiStatus);
             }
             break;
 
@@ -465,13 +457,13 @@ void MGR_ResetCounters(void)
 */
 void MGR_SaveHkFile(void)
 {
-    int32 status = OS_SUCCESS;
+    int32     status = OS_SUCCESS;
     osal_id_t osal_fd;
 
     status = OS_OpenCreate(&osal_fd, MGR_CFG_FILE_PATH, OS_FILE_FLAG_CREATE | OS_FILE_FLAG_TRUNCATE, OS_READ_WRITE);
     if (status != OS_SUCCESS)
     {
-        OS_printf("MGR Error: Cannot Open %s for writing. Error = %d \n", MGR_CFG_FILE_PATH, (int32) osal_fd);
+        OS_printf("MGR Error: Cannot Open %s for writing. Error = %d \n", MGR_CFG_FILE_PATH, (int32)osal_fd);
     }
     else
     {
@@ -489,9 +481,9 @@ void MGR_SaveHkFile(void)
 */
 void MGR_RestoreHkFile(void)
 {
-    int32 status = OS_SUCCESS;
+    int32     status = OS_SUCCESS;
     osal_id_t osal_fd;
-    int32  size_read;
+    int32     size_read;
     OS_time_t temp_time;
 
     status = OS_OpenCreate(&osal_fd, MGR_CFG_FILE_PATH, OS_FILE_FLAG_NONE, OS_READ_ONLY);
@@ -505,8 +497,8 @@ void MGR_RestoreHkFile(void)
         OS_write(osal_fd, &MGR_AppData.HkTelemetryPkt, sizeof(MGR_Hk_tlm_t));
 
         /* Initialize packet */
-        CFE_MSG_Init(CFE_MSG_PTR(MGR_AppData.HkTelemetryPkt.TlmHeader), 
-            CFE_SB_ValueToMsgId(MGR_HK_TLM_MID), MGR_HK_TLM_LNGTH);
+        CFE_MSG_Init(CFE_MSG_PTR(MGR_AppData.HkTelemetryPkt.TlmHeader), CFE_SB_ValueToMsgId(MGR_HK_TLM_MID),
+                     MGR_HK_TLM_LNGTH);
     }
     else
     {
@@ -515,10 +507,10 @@ void MGR_RestoreHkFile(void)
         {
             OS_printf("MGR: Restore Hk packet error: OS_read returned error\n");
             memset(&MGR_AppData.HkTelemetryPkt, 0, sizeof(MGR_Hk_tlm_t));
-            
+
             /* Initialize packet */
-            CFE_MSG_Init(CFE_MSG_PTR(MGR_AppData.HkTelemetryPkt.TlmHeader), 
-                CFE_SB_ValueToMsgId(MGR_HK_TLM_MID), MGR_HK_TLM_LNGTH);
+            CFE_MSG_Init(CFE_MSG_PTR(MGR_AppData.HkTelemetryPkt.TlmHeader), CFE_SB_ValueToMsgId(MGR_HK_TLM_MID),
+                         MGR_HK_TLM_LNGTH);
         }
     }
     OS_close(osal_fd);
@@ -526,9 +518,8 @@ void MGR_RestoreHkFile(void)
     /*
     ** Make sure the SpacecraftMode is valid and set boot counters
     **/
-    if ((MGR_AppData.HkTelemetryPkt.SpacecraftMode != MGR_SAFE_REBOOT_MODE) && 
-        (MGR_AppData.HkTelemetryPkt.SpacecraftMode != MGR_SCIENCE_REBOOT_MODE)
-       )
+    if ((MGR_AppData.HkTelemetryPkt.SpacecraftMode != MGR_SAFE_REBOOT_MODE) &&
+        (MGR_AppData.HkTelemetryPkt.SpacecraftMode != MGR_SCIENCE_REBOOT_MODE))
     {
         MGR_AppData.HkTelemetryPkt.SpacecraftMode = MGR_SAFE_REBOOT_MODE;
         MGR_AppData.HkTelemetryPkt.AnomRebootCtr++;
@@ -541,7 +532,7 @@ void MGR_RestoreHkFile(void)
 
     /*
      * Set the time with the boot offset
-    */
+     */
     OS_GetLocalTime(&temp_time);
     temp_time.ticks = temp_time.ticks + MGR_CFG_REBOOT_TIME_TIC_OFFSET + MGR_AppData.HkTelemetryPkt.TimeTics;
     OS_SetLocalTime(&temp_time);

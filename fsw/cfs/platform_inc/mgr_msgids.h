@@ -22,6 +22,6 @@
 /*
 ** CCSDS V1 Telemetry Message IDs
 */
-#define MGR_HK_TLM_MID     0x08F8
+#define MGR_HK_TLM_MID 0x08F8
 
 #endif /* _MGR_MSGIDS_H_ */

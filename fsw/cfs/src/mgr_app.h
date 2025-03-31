@@ -25,13 +25,13 @@
 */
 #define MGR_PIPE_DEPTH 32
 
-/* 
+/*
 ** Spacecraft Modes
 */
-#define MGR_SAFE_MODE 1
-#define MGR_SAFE_REBOOT_MODE 2
+#define MGR_SAFE_MODE           1
+#define MGR_SAFE_REBOOT_MODE    2
 #define MGR_SCIENCE_ACTIVE_MODE 3
-#define MGR_SCIENCE_IDLE_MODE 4
+#define MGR_SCIENCE_IDLE_MODE   4
 #define MGR_SCIENCE_REBOOT_MODE 5
 
 /*

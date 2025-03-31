@@ -28,7 +28,7 @@
 /*
 ** Telemetry Request Command Codes
 */
-#define MGR_REQ_HK_TLM   0
+#define MGR_REQ_HK_TLM 0
 
 /*
 ** Generic "no arguments" command type definition

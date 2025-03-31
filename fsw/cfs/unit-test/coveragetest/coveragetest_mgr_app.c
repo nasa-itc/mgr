@@ -184,8 +184,7 @@ void Test_MGR_AppMain(void)
      * log will show what the incorrect value was.
      */
     UtAssert_True(MGR_AppData.RunStatus == CFE_ES_RunStatus_APP_ERROR,
-                  "MGR_AppData.RunStatus (%lu) == CFE_ES_RunStatus_APP_ERROR",
-                  (unsigned long)MGR_AppData.RunStatus);
+                  "MGR_AppData.RunStatus (%lu) == CFE_ES_RunStatus_APP_ERROR", (unsigned long)MGR_AppData.RunStatus);
 
     /*
      * Note that CFE_ES_RunLoop returns a boolean value,
@@ -275,15 +274,13 @@ void Test_MGR_ProcessTelemetryRequest(void)
 
     UT_CheckEvent_Setup(&EventTest, MGR_REQ_DATA_ERR_EID, NULL);
     MGR_ProcessTelemetryRequest();
-    UtAssert_True(EventTest.MatchCount == 0, "MGR_REQ_DATA_ERR_EID generated (%u)",
-                  (unsigned int)EventTest.MatchCount);
+    UtAssert_True(EventTest.MatchCount == 0, "MGR_REQ_DATA_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
 
     FcnCode = 99;
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
     MGR_ProcessTelemetryRequest();
-    UtAssert_True(EventTest.MatchCount == 0, "MGR_REQ_DATA_ERR_EID generated (%u)",
-                  (unsigned int)EventTest.MatchCount);
+    UtAssert_True(EventTest.MatchCount == 0, "MGR_REQ_DATA_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
 }
 
 void Test_MGR_ProcessCommandPacket(void)
@@ -295,7 +292,7 @@ void Test_MGR_ProcessCommandPacket(void)
     /* a buffer large enough for any command message */
     union
     {
-        CFE_SB_Buffer_t     SBBuf;
+        CFE_SB_Buffer_t  SBBuf;
         MGR_NoArgs_cmd_t Noop;
     } TestMsg;
     CFE_SB_MsgId_t    TestMsgId;
@@ -318,8 +315,7 @@ void Test_MGR_ProcessCommandPacket(void)
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &MsgSize, sizeof(MsgSize), false);
     MGR_ProcessCommandPacket();
-    UtAssert_True(EventTest.MatchCount == 0, "MGR_CMD_ERR_EID not generated (%u)",
-                  (unsigned int)EventTest.MatchCount);
+    UtAssert_True(EventTest.MatchCount == 0, "MGR_CMD_ERR_EID not generated (%u)", (unsigned int)EventTest.MatchCount);
 
     TestMsgId = CFE_SB_ValueToMsgId(MGR_REQ_HK_MID);
     FcnCode   = MGR_REQ_HK_TLM;
@@ -329,8 +325,7 @@ void Test_MGR_ProcessCommandPacket(void)
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &MsgSize, sizeof(MsgSize), false);
     MGR_ProcessCommandPacket();
-    UtAssert_True(EventTest.MatchCount == 0, "MGR_CMD_ERR_EID not generated (%u)",
-                  (unsigned int)EventTest.MatchCount);
+    UtAssert_True(EventTest.MatchCount == 0, "MGR_CMD_ERR_EID not generated (%u)", (unsigned int)EventTest.MatchCount);
 
     /* invalid message id */
     TestMsgId = CFE_SB_INVALID_MSG_ID;
@@ -353,7 +348,7 @@ void Test_MGR_ProcessGroundCommand(void)
     /* a buffer large enough for any command message */
     union
     {
-        CFE_SB_Buffer_t     SBBuf;
+        CFE_SB_Buffer_t  SBBuf;
         MGR_NoArgs_cmd_t Noop;
         MGR_NoArgs_cmd_t Reset;
     } TestMsg;
@@ -378,11 +373,10 @@ void Test_MGR_ProcessGroundCommand(void)
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
     UT_CheckEvent_Setup(&EventTest, MGR_CMD_NOOP_INF_EID, NULL);
     MGR_ProcessGroundCommand();
-    UtAssert_True(EventTest.MatchCount == 1, "MGR_CMD_NOOP_INF_EID generated (%u)",
-                  (unsigned int)EventTest.MatchCount);
+    UtAssert_True(EventTest.MatchCount == 1, "MGR_CMD_NOOP_INF_EID generated (%u)", (unsigned int)EventTest.MatchCount);
     /* test failure of command length */
     FcnCode = MGR_NOOP_CC;
-    Size    = (size_t) 99;
+    Size    = (size_t)99;
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
@@ -403,7 +397,7 @@ void Test_MGR_ProcessGroundCommand(void)
                   (unsigned int)EventTest.MatchCount);
     /* test failure of command length */
     FcnCode = MGR_RESET_COUNTERS_CC;
-    Size    = (size_t) 99;
+    Size    = (size_t)99;
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
@@ -477,8 +471,7 @@ void Test_MGR_VerifyCmdLength(void)
     /*
      * Confirm that the event was NOT generated
      */
-    UtAssert_True(EventTest.MatchCount == 0, "MGR_LEN_ERR_EID NOT generated (%u)",
-                  (unsigned int)EventTest.MatchCount);
+    UtAssert_True(EventTest.MatchCount == 0, "MGR_LEN_ERR_EID NOT generated (%u)", (unsigned int)EventTest.MatchCount);
 
     /*
      * test a mismatch case
