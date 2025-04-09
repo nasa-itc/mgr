@@ -21,8 +21,8 @@
 
 #define MGR_SCI_PASS_INC_CC   4
 #define MGR_SCI_PASS_RESET_CC 5
-#define MGR_SET_CONUS_CC      6
-#define MGR_SET_AK_CC         7
+#define MGR_SET_AK_CC         6
+#define MGR_SET_CONUS_CC      7
 #define MGR_SET_HI_CC         8
 
 /*
@@ -64,9 +64,9 @@ typedef struct
     uint16                    AnomRebootCtr;
     int64                     TimeTics;
     uint16                    SciPassCount;
-    uint8                     ConusStatus;
-    uint8                     AkStatus;
-    uint8                     HiStatus;
+    uint8                     AkConfig;
+    uint8                     ConusConfig;
+    uint8                     HiConfig;
 
 } __attribute__((packed)) MGR_Hk_tlm_t;
 #define MGR_HK_TLM_LNGTH sizeof(MGR_Hk_tlm_t)
