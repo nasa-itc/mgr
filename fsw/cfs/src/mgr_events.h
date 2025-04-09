@@ -34,6 +34,8 @@
 #define MGR_CMD_SETCONUS_ERR_EID      21
 #define MGR_CMD_SETAK_ERR_EID         22
 #define MGR_CMD_SETHI_ERR_EID         23
+#define MGR_CMD_UPDATE_SCI_STATUS_INF_EID 24
+#define MGR_CMD_UPDATE_SCI_STATUS_ERR_EID 25
 
 /* Standard telemetry event IDs */
 #define MGR_DEVICE_TLM_ERR_EID 30

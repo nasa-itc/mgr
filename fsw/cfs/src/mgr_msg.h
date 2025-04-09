@@ -24,6 +24,7 @@
 #define MGR_SET_AK_CC         6
 #define MGR_SET_CONUS_CC      7
 #define MGR_SET_HI_CC         8
+#define MGR_UPDATE_SCI_STATUS_CC 9
 
 /*
 ** Telemetry Request Command Codes
@@ -63,6 +64,7 @@ typedef struct
     uint16                    BootCounter;
     uint16                    AnomRebootCtr;
     int64                     TimeTics;
+    uint8                     ScienceStatus;
     uint16                    SciPassCount;
     uint8                     AkConfig;
     uint8                     ConusConfig;
