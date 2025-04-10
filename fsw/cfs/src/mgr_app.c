@@ -416,7 +416,7 @@ void MGR_ProcessGroundCommand(void)
                 {
                     MGR_AppData.HkTelemetryPkt.ScienceStatus = status_cmd->U8;
                     CFE_EVS_SendEvent(MGR_CMD_UPDATE_SCI_STATUS_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                      "MGR: Set mode command received [%d]", MGR_AppData.HkTelemetryPkt.ScienceStatus);
+                                      "MGR: Set science status command received [%d]", MGR_AppData.HkTelemetryPkt.ScienceStatus);
                 }
             }
             break;
