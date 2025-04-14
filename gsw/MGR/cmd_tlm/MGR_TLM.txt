@@ -16,7 +16,8 @@ TELEMETRY MGR MGR_HK_TLM LITTLE_ENDIAN "MGR_Hk_tlm_t"
   APPEND_ITEM    ANOM_REBOOT_COUNTER  16 UINT         "Anomalous Boot Count"
   APPEND_ITEM    TIME_TICS            64 UINT         "Time Tics Offset from J2000"
   APPEND_ITEM    SCIENCE_STATUS        8 UINT         "Science Status Field"
-    STATE SCIENCE_INITIALIZED   1
+    STATE SCIENCE_OFF             0
+    STATE SCIENCE_INITIALIZED     1
     STATE SCIENCE_OVER_AK         2
     STATE SCIENCE_OVER_CONUS      3
     STATE SCIENCE_OVER_HI         4

@@ -36,6 +36,7 @@
 /*
 ** Science Status
 */
+#define SS_SCIENCE_OFF             0
 #define SS_SCIENCE_INITIALIZED     1
 #define SS_SCIENCE_OVER_AK         2
 #define SS_SCIENCE_OVER_CONUS      3

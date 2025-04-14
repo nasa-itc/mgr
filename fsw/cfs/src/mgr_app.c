@@ -406,7 +406,7 @@ void MGR_ProcessGroundCommand(void)
             if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
             {
                 MGR_U8_cmd_t *status_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
-                if ((status_cmd->U8 < SS_SCIENCE_INITIALIZED) || (status_cmd->U8 > SS_EXITED_SCIENCE_MODE))
+                if (status_cmd->U8 > SS_EXITED_SCIENCE_MODE)
                 {
                     CFE_EVS_SendEvent(MGR_CMD_UPDATE_SCI_STATUS_ERR_EID, CFE_EVS_EventType_ERROR,
                                       "MGR: Invalid science status update, received [%d], status remains [%d]", status_cmd->U8,
