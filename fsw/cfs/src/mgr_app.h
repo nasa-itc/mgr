@@ -36,17 +36,17 @@
 /*
 ** Science Status
 */
-#define SS_SCIENCE_OFF             0
-#define SS_SCIENCE_INITIALIZED     1
-#define SS_SCIENCE_OVER_AK         2
-#define SS_SCIENCE_OVER_CONUS      3
-#define SS_SCIENCE_OVER_HI         4
-#define SS_NO_SCIENCE_LEFT_AK      5
-#define SS_NO_SCIENCE_LEFT_CONUS   6
-#define SS_NO_SCIENCE_LEFT_HI      7
-#define SS_NO_SCIENCE_LOW_POWER    8
-#define SS_NO_SCIENCE_RECHARGED    9
-#define SS_EXITED_SCIENCE_MODE     10
+#define SS_SCIENCE_OFF           0
+#define SS_SCIENCE_INITIALIZED   1
+#define SS_SCIENCE_OVER_AK       2
+#define SS_SCIENCE_OVER_CONUS    3
+#define SS_SCIENCE_OVER_HI       4
+#define SS_NO_SCIENCE_LEFT_AK    5
+#define SS_NO_SCIENCE_LEFT_CONUS 6
+#define SS_NO_SCIENCE_LEFT_HI    7
+#define SS_NO_SCIENCE_LOW_POWER  8
+#define SS_NO_SCIENCE_RECHARGED  9
+#define SS_EXITED_SCIENCE_MODE   10
 
 /*
 ** MGR global data structure

@@ -19,11 +19,11 @@
 #define MGR_SET_MODE_CC       2
 #define MGR_REBOOT_PREP_CC    3
 
-#define MGR_SCI_PASS_INC_CC   4
-#define MGR_SCI_PASS_RESET_CC 5
-#define MGR_SET_AK_CC         6
-#define MGR_SET_CONUS_CC      7
-#define MGR_SET_HI_CC         8
+#define MGR_SCI_PASS_INC_CC      4
+#define MGR_SCI_PASS_RESET_CC    5
+#define MGR_SET_AK_CC            6
+#define MGR_SET_CONUS_CC         7
+#define MGR_SET_HI_CC            8
 #define MGR_UPDATE_SCI_STATUS_CC 9
 
 /*

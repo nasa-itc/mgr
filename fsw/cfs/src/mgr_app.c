@@ -338,16 +338,17 @@ void MGR_ProcessGroundCommand(void)
             {
                 MGR_U8_cmd_t *ak_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
 
-                if(ak_cmd->U8 <= 1)
+                if (ak_cmd->U8 <= 1)
                 {
                     MGR_AppData.HkTelemetryPkt.AkConfig = ak_cmd->U8;
                     CFE_EVS_SendEvent(MGR_CMD_SETAK_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                      "MGR: En/Dis AK Region command received, value: [%d]", MGR_AppData.HkTelemetryPkt.AkConfig);
+                                      "MGR: En/Dis AK Region command received, value: [%d]",
+                                      MGR_AppData.HkTelemetryPkt.AkConfig);
                 }
                 else
                 {
                     CFE_EVS_SendEvent(MGR_CMD_SETAK_ERR_EID, CFE_EVS_EventType_ERROR,
-                                        "MGR: Invalid En/Dis AK Region command received [%d]", ak_cmd->U8);
+                                      "MGR: Invalid En/Dis AK Region command received [%d]", ak_cmd->U8);
                 }
             }
             break;
@@ -360,11 +361,12 @@ void MGR_ProcessGroundCommand(void)
             {
                 MGR_U8_cmd_t *conus_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
 
-                if(conus_cmd->U8 <= 1)
+                if (conus_cmd->U8 <= 1)
                 {
                     MGR_AppData.HkTelemetryPkt.ConusConfig = conus_cmd->U8;
                     CFE_EVS_SendEvent(MGR_CMD_SETCONUS_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                      "MGR: En/Dis CONUS Region command received, value: [%d]", MGR_AppData.HkTelemetryPkt.ConusConfig);
+                                      "MGR: En/Dis CONUS Region command received, value: [%d]",
+                                      MGR_AppData.HkTelemetryPkt.ConusConfig);
                 }
                 else
                 {
@@ -372,7 +374,7 @@ void MGR_ProcessGroundCommand(void)
                                       "MGR: Invalid En/Dis CONUS Region command received [%d]", conus_cmd->U8);
                 }
             }
-            
+
             break;
 
         /*
@@ -383,16 +385,17 @@ void MGR_ProcessGroundCommand(void)
             {
                 MGR_U8_cmd_t *hi_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
 
-                if(hi_cmd->U8 <= 1)
+                if (hi_cmd->U8 <= 1)
                 {
                     MGR_AppData.HkTelemetryPkt.HiConfig = hi_cmd->U8;
                     CFE_EVS_SendEvent(MGR_CMD_SETHI_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                      "MGR: En/Dis HI Region command received, value: [%d]", MGR_AppData.HkTelemetryPkt.HiConfig);
+                                      "MGR: En/Dis HI Region command received, value: [%d]",
+                                      MGR_AppData.HkTelemetryPkt.HiConfig);
                 }
                 else
                 {
                     CFE_EVS_SendEvent(MGR_CMD_SETHI_ERR_EID, CFE_EVS_EventType_ERROR,
-                                        "MGR: Invalid En/Dis HI Region command received [%d]", hi_cmd->U8);
+                                      "MGR: Invalid En/Dis HI Region command received [%d]", hi_cmd->U8);
                 }
             }
             break;
@@ -409,14 +412,15 @@ void MGR_ProcessGroundCommand(void)
                 if (status_cmd->U8 > SS_EXITED_SCIENCE_MODE)
                 {
                     CFE_EVS_SendEvent(MGR_CMD_UPDATE_SCI_STATUS_ERR_EID, CFE_EVS_EventType_ERROR,
-                                      "MGR: Invalid science status update, received [%d], status remains [%d]", status_cmd->U8,
-                                      MGR_AppData.HkTelemetryPkt.ScienceStatus);
+                                      "MGR: Invalid science status update, received [%d], status remains [%d]",
+                                      status_cmd->U8, MGR_AppData.HkTelemetryPkt.ScienceStatus);
                 }
                 else
                 {
                     MGR_AppData.HkTelemetryPkt.ScienceStatus = status_cmd->U8;
                     CFE_EVS_SendEvent(MGR_CMD_UPDATE_SCI_STATUS_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                      "MGR: Set science status command received [%d]", MGR_AppData.HkTelemetryPkt.ScienceStatus);
+                                      "MGR: Set science status command received [%d]",
+                                      MGR_AppData.HkTelemetryPkt.ScienceStatus);
                 }
             }
             break;

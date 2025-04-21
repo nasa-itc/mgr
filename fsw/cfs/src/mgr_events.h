@@ -20,20 +20,20 @@
 #define MGR_PROCESS_CMD_ERR_EID 6
 
 /* Standard command event IDs */
-#define MGR_CMD_ERR_EID               10
-#define MGR_CMD_NOOP_INF_EID          11
-#define MGR_CMD_RESET_INF_EID         12
-#define MGR_CMD_SETMODE_INF_EID       13
-#define MGR_CMD_SETMODE_ERR_EID       14
-#define MGR_CMD_REBOOT_PREP_INF_EID   15
-#define MGR_CMD_SCIPASS_INF_EID       16
-#define MGR_CMD_RESET_SCIPASS_INF_EID 17
-#define MGR_CMD_SETCONUS_INF_EID      18
-#define MGR_CMD_SETAK_INF_EID         19
-#define MGR_CMD_SETHI_INF_EID         20
-#define MGR_CMD_SETCONUS_ERR_EID      21
-#define MGR_CMD_SETAK_ERR_EID         22
-#define MGR_CMD_SETHI_ERR_EID         23
+#define MGR_CMD_ERR_EID                   10
+#define MGR_CMD_NOOP_INF_EID              11
+#define MGR_CMD_RESET_INF_EID             12
+#define MGR_CMD_SETMODE_INF_EID           13
+#define MGR_CMD_SETMODE_ERR_EID           14
+#define MGR_CMD_REBOOT_PREP_INF_EID       15
+#define MGR_CMD_SCIPASS_INF_EID           16
+#define MGR_CMD_RESET_SCIPASS_INF_EID     17
+#define MGR_CMD_SETCONUS_INF_EID          18
+#define MGR_CMD_SETAK_INF_EID             19
+#define MGR_CMD_SETHI_INF_EID             20
+#define MGR_CMD_SETCONUS_ERR_EID          21
+#define MGR_CMD_SETAK_ERR_EID             22
+#define MGR_CMD_SETHI_ERR_EID             23
 #define MGR_CMD_UPDATE_SCI_STATUS_INF_EID 24
 #define MGR_CMD_UPDATE_SCI_STATUS_ERR_EID 25
 
