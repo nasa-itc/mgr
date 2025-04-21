@@ -489,7 +489,7 @@ void MGR_ReportHousekeeping(void)
 
     /* Save Hk file*/
     MGR_SaveHkFile();
-    // OS_printf("MGR: TimeTics = %ld \n", MGR_AppData.HkTelemetryPkt.TimeTics);
+    OS_printf("MGR: TimeTics = %ld \n", MGR_AppData.HkTelemetryPkt.TimeTics);
 
     return;
 }
