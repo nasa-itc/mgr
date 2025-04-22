@@ -287,8 +287,7 @@ void MGR_ProcessGroundCommand(void)
         case MGR_REBOOT_PREP_CC:
             if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_NoArgs_cmd_t)) == OS_SUCCESS)
             {
-                if ((MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_ACTIVE_MODE) ||
-                    (MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_IDLE_MODE) ||
+                if ((MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_MODE) ||
                     (MGR_AppData.HkTelemetryPkt.SpacecraftMode == MGR_SCIENCE_REBOOT_MODE))
                 {
                     MGR_AppData.HkTelemetryPkt.SpacecraftMode = MGR_SCIENCE_REBOOT_MODE;
@@ -332,44 +331,97 @@ void MGR_ProcessGroundCommand(void)
             break;
 
         /*
-        ** Set CONUS Status
-        */
-        case MGR_SET_CONUS_CC:
-            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
-            {
-                MGR_U8_cmd_t *conus_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
-
-                MGR_AppData.HkTelemetryPkt.ConusStatus = conus_cmd->U8;
-                CFE_EVS_SendEvent(MGR_CMD_SETCONUS_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                  "MGR: Set CONUS command received [%d]", MGR_AppData.HkTelemetryPkt.ConusStatus);
-            }
-            break;
-
-        /*
-        ** Set AK Status
+        ** Set AK Config (Enabled/Disabled)
         */
         case MGR_SET_AK_CC:
             if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
             {
                 MGR_U8_cmd_t *ak_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
 
-                MGR_AppData.HkTelemetryPkt.AkStatus = ak_cmd->U8;
-                CFE_EVS_SendEvent(MGR_CMD_SETAK_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                  "MGR: Set AK command received [%d]", MGR_AppData.HkTelemetryPkt.AkStatus);
+                if (ak_cmd->U8 <= 1)
+                {
+                    MGR_AppData.HkTelemetryPkt.AkConfig = ak_cmd->U8;
+                    CFE_EVS_SendEvent(MGR_CMD_SETAK_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                      "MGR: En/Dis AK Region command received, value: [%d]",
+                                      MGR_AppData.HkTelemetryPkt.AkConfig);
+                }
+                else
+                {
+                    CFE_EVS_SendEvent(MGR_CMD_SETAK_ERR_EID, CFE_EVS_EventType_ERROR,
+                                      "MGR: Invalid En/Dis AK Region command received [%d]", ak_cmd->U8);
+                }
             }
             break;
 
         /*
-        ** Set HI Status
+        ** Set CONUS Config (Enabled/Disabled)
+        */
+        case MGR_SET_CONUS_CC:
+            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
+            {
+                MGR_U8_cmd_t *conus_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
+
+                if (conus_cmd->U8 <= 1)
+                {
+                    MGR_AppData.HkTelemetryPkt.ConusConfig = conus_cmd->U8;
+                    CFE_EVS_SendEvent(MGR_CMD_SETCONUS_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                      "MGR: En/Dis CONUS Region command received, value: [%d]",
+                                      MGR_AppData.HkTelemetryPkt.ConusConfig);
+                }
+                else
+                {
+                    CFE_EVS_SendEvent(MGR_CMD_SETCONUS_ERR_EID, CFE_EVS_EventType_ERROR,
+                                      "MGR: Invalid En/Dis CONUS Region command received [%d]", conus_cmd->U8);
+                }
+            }
+
+            break;
+
+        /*
+        ** Set HI Config (Enabled/Disabled)
         */
         case MGR_SET_HI_CC:
             if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
             {
                 MGR_U8_cmd_t *hi_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
 
-                MGR_AppData.HkTelemetryPkt.HiStatus = hi_cmd->U8;
-                CFE_EVS_SendEvent(MGR_CMD_SETHI_INF_EID, CFE_EVS_EventType_INFORMATION,
-                                  "MGR: Set HI command received [%d]", MGR_AppData.HkTelemetryPkt.HiStatus);
+                if (hi_cmd->U8 <= 1)
+                {
+                    MGR_AppData.HkTelemetryPkt.HiConfig = hi_cmd->U8;
+                    CFE_EVS_SendEvent(MGR_CMD_SETHI_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                      "MGR: En/Dis HI Region command received, value: [%d]",
+                                      MGR_AppData.HkTelemetryPkt.HiConfig);
+                }
+                else
+                {
+                    CFE_EVS_SendEvent(MGR_CMD_SETHI_ERR_EID, CFE_EVS_EventType_ERROR,
+                                      "MGR: Invalid En/Dis HI Region command received [%d]", hi_cmd->U8);
+                }
+            }
+            break;
+
+        /*
+        ** Update Science Status Command
+        ** NOTE: NOT sent from the ground, sent by RTSs for telemetry usage by operators
+        ** Indicates what science is/has happened
+        */
+        case MGR_UPDATE_SCI_STATUS_CC:
+            if (MGR_VerifyCmdLength(MGR_AppData.MsgPtr, sizeof(MGR_U8_cmd_t)) == OS_SUCCESS)
+            {
+                MGR_U8_cmd_t *status_cmd = (MGR_U8_cmd_t *)MGR_AppData.MsgPtr;
+                if (status_cmd->U8 > SS_EXITED_SCIENCE_MODE)
+                {
+                    CFE_EVS_SendEvent(MGR_CMD_UPDATE_SCI_STATUS_ERR_EID, CFE_EVS_EventType_ERROR,
+                                      "MGR: Invalid science status update, received [%d], status remains [%d]",
+                                      status_cmd->U8, MGR_AppData.HkTelemetryPkt.ScienceStatus);
+                }
+                else
+                {
+                    MGR_AppData.HkTelemetryPkt.ScienceStatus = status_cmd->U8;
+                    CFE_EVS_SendEvent(MGR_CMD_UPDATE_SCI_STATUS_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                      "MGR: Set science status command received [%d]",
+                                      MGR_AppData.HkTelemetryPkt.ScienceStatus);
+                }
             }
             break;
 
